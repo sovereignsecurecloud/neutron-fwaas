@@ -309,10 +309,16 @@ class OVSFirewallDriver(driver_base.FirewallL2DriverBase):
         return ovs_port
 
     def _get_port_vlan_tag(self, port):
-        vlan_tag = port.get('lvlan', None)
-        if not vlan_tag:
+        vlan_tag = port.get('lvlan')
+        if vlan_tag:
+            return vlan_tag
+        ovs_port = self.get_ovs_port(port['device'])
+        other_config = self.int_br.br.db_get_val(
+            'Port', ovs_port.port_name, 'other_config')
+        try:
+            return int(other_config['tag'])
+        except (KeyError, TypeError, ValueError):
             raise exceptions.OVSFWaaSTagNotFound(port_id=port['device'])
-        return vlan_tag
 
     # NOTE(ivasilevskaya) That's a copy-paste from neutron ovsfw driver
     def get_ofport(self, port):

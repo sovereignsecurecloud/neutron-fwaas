@@ -676,8 +676,18 @@ class TestOVSFirewallDriver(base.BaseTestCase):
         port_dict = {'device': 'port-id',
                      'firewall_group': 1,
                      'lvlan': None}
+        self.mock_bridge.br.db_get_val.return_value = {}
         self.firewall._initialize_egress_no_port_security(port_dict)
         self.assertFalse(self.mock_bridge.br.add_flow.called)
+
+    def test__get_port_vlan_tag_from_ovs_other_config(self):
+        port_dict = {'device': 'port-id', 'firewall_group': 1}
+        self.mock_bridge.br.db_get_val.return_value = {
+            'tag': str(TESTING_VLAN_TAG)}
+        self.assertEqual(TESTING_VLAN_TAG,
+                         self.firewall._get_port_vlan_tag(port_dict))
+        self.mock_bridge.br.db_get_val.assert_called_once_with(
+            'Port', self.fake_ovs_port.port_name, 'other_config')
 
     def test__remove_egress_no_port_security_deletes_flow(self):
         self.mock_bridge.br.db_get_val.return_value = {'tag': TESTING_VLAN_TAG}
