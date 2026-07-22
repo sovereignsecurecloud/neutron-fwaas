@@ -22,12 +22,28 @@ Create Date: 2025-03-02 14:06:28.794129
 """
 
 from alembic import op
+import sqlalchemy as sa
+
 
 # revision identifiers, used by Alembic.
 revision = '1007f519ea46'
 down_revision = 'fd38cd995cc0'
 
 
+def schema_has_table(table_name):
+    """Check whether the specified table exists in the current schema.
+
+    This method cannot be executed in offline mode.
+    """
+    insp = sa.inspect(op.get_bind())
+    return table_name in insp.get_table_names()
+
+
+# NOTE(ralonsoh): this contract migration should have not been accepted.
+# Neutron stopped the contract migrations in Newton.
+# We'll eventually make this a no-op migration once all the tables are
+# deleted. Now (2026.2) we are deleting the creation of the following
+# tables. In 2028.2 we'll be able to make this migration a no-op.
 def upgrade():
     table_names = [
         'cisco_firewall_associations',
@@ -37,4 +53,5 @@ def upgrade():
         'firewall_policies',
     ]
     for table_name in table_names:
-        op.drop_table(table_name)
+        if schema_has_table(table_name):
+            op.drop_table(table_name)

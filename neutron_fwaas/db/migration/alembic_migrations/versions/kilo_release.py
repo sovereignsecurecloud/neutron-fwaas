@@ -14,14 +14,14 @@
 """kilo
 
 Revision ID: kilo
-Revises: 796c68dffbb
+Revises: 4202e3047e47
 Create Date: 2015-04-16 00:00:00.000000
 
 """
 
 # revision identifiers, used by Alembic.
 revision = 'kilo'
-down_revision = '796c68dffbb'
+down_revision = '4202e3047e47'
 
 
 def upgrade():
