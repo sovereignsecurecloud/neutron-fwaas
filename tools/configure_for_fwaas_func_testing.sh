@@ -1,5 +1,6 @@
-set -e
+#!/bin/bash
 
+set -e
 
 IS_GATE=${IS_GATE:-False}
 USE_CONSTRAINT_ENV=${USE_CONSTRAINT_ENV:-False}
