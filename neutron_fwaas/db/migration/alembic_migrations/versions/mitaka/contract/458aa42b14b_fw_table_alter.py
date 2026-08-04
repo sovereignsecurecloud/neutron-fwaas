@@ -21,8 +21,6 @@ Create Date: 2015-09-16 11:47:43.061649
 
 """
 
-from alembic import op
-
 from neutron.db import migration
 
 
@@ -34,16 +32,9 @@ down_revision = '67c8e8d61d5'
 neutron_milestone = [migration.MITAKA]
 
 
-FW_TAB_NAME = ['firewall_rules', 'firewall_policies', 'firewalls']
-SQL_STATEMENT_UPDATE_CMD = (
-    "alter table %s "
-    "modify name varchar(255) "
-    "CHARACTER SET utf8 COLLATE utf8_bin"
-)
-
-
+# NOTE(ralonsoh): this migration operated on the FWaaS v1 tables that are no
+# longer created. The v1 tables were removed from the Neutron initial migration
+# and dropped by the 2025.1 contract migration 1007f519ea46. This script is
+# kept as a no-op because it is a milestone marker in the contract branch.
 def upgrade():
-    context = op.get_context()
-    if context.bind.dialect.name == 'mysql':
-        for table in FW_TAB_NAME:
-            op.execute(SQL_STATEMENT_UPDATE_CMD % table)
+    pass

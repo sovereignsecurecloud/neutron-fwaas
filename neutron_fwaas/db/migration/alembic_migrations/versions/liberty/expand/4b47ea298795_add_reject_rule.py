@@ -20,9 +20,7 @@ Create Date: 2015-04-15 04:19:57.324584
 
 """
 
-from alembic import op
 from neutron.db import migration
-import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
@@ -33,9 +31,9 @@ down_revision = 'c40fbb377ad'
 neutron_milestone = [migration.LIBERTY, migration.MITAKA]
 
 
-new_action = sa.Enum('allow', 'deny', 'reject', name='firewallrules_action')
-
-
+# NOTE(ralonsoh): this migration operated on the FWaaS v1 tables that are no
+# longer created. The v1 tables were removed from the Neutron initial migration
+# and dropped by the 2025.1 contract migration 1007f519ea46. This script is
+# kept as a no-op because it is a milestone marker in the expand branch.
 def upgrade():
-    op.alter_column('firewall_rules', 'action', type_=new_action,
-                    nullable=True)
+    pass

@@ -21,10 +21,6 @@ Create Date: 2016-07-14 13:11:53.112622
 
 """
 
-from alembic import op
-import sqlalchemy as sa
-from sqlalchemy.engine import reflection
-
 from neutron.db import migration
 
 
@@ -35,108 +31,10 @@ down_revision = '458aa42b14b'
 # milestone identifier, used by neutron-db-manage
 neutron_milestone = [migration.NEWTON]
 
-_INSPECTOR = None
 
-
-def get_inspector():
-    """Reuse inspector"""
-
-    global _INSPECTOR
-
-    if _INSPECTOR:
-        return _INSPECTOR
-
-    else:
-        bind = op.get_bind()
-        _INSPECTOR = reflection.Inspector.from_engine(bind)
-
-    return _INSPECTOR
-
-
-def get_tables():
-    """Returns hardcoded list of tables which have ``tenant_id`` column.
-
-    The list is hardcoded to match the state of the schema when this
-    upgrade script is run.
-    """
-
-    tables = [
-        'firewalls',
-        'firewall_policies',
-        'firewall_rules',
-    ]
-
-    return tables
-
-
-def get_columns(table):
-    """Returns list of columns for given table."""
-    inspector = get_inspector()
-    return inspector.get_columns(table)
-
-
-def get_data():
-    """Returns combined list of tuples: [(table, column)].
-
-    The list is built from tables with a tenant_id column.
-    """
-
-    output = []
-    tables = get_tables()
-    for table in tables:
-        columns = get_columns(table)
-
-        for column in columns:
-            if column['name'] == 'tenant_id':
-                output.append((table, column))
-
-    return output
-
-
-def alter_column(table, column):
-    old_name = 'tenant_id'
-    new_name = 'project_id'
-
-    op.alter_column(
-        table_name=table,
-        column_name=old_name,
-        new_column_name=new_name,
-        existing_type=column['type'],
-        existing_nullable=column['nullable']
-    )
-
-
-def recreate_index(index, table_name):
-    old_name = index['name']
-    new_name = old_name.replace('tenant', 'project')
-
-    op.drop_index(index_name=op.f(old_name), table_name=table_name)
-    op.create_index(new_name, table_name, ['project_id'])
-
-
+# NOTE(ralonsoh): this migration operated on the FWaaS v1 tables that are no
+# longer created. The v1 tables were removed from the Neutron initial migration
+# and dropped by the 2025.1 contract migration 1007f519ea46. This script is
+# kept as a no-op because it is a milestone marker in the contract branch.
 def upgrade():
-    """Code reused from
-
-    Change-Id: I87a8ef342ccea004731ba0192b23a8e79bc382dc
-    """
-
-    inspector = get_inspector()
-
-    data = get_data()
-    for table, column in data:
-        alter_column(table, column)
-
-        indexes = inspector.get_indexes(table)
-        for index in indexes:
-            if 'tenant_id' in index['name']:
-                recreate_index(index, table)
-
-
-def contract_creation_exceptions():
-    """Special migration for the blueprint to support Keystone V3.
-    We drop all tenant_id columns and create project_id columns instead.
-    """
-    return {
-        sa.Column: ['.'.join([table, 'project_id']) for table in get_tables()],
-        sa.Index: get_tables()
-    }
+    pass

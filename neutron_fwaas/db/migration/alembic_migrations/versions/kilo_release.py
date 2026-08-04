@@ -14,14 +14,14 @@
 """kilo
 
 Revision ID: kilo
-Revises: 4202e3047e47
+Revises: start_neutron_fwaas
 Create Date: 2015-04-16 00:00:00.000000
 
 """
 
 # revision identifiers, used by Alembic.
 revision = 'kilo'
-down_revision = '4202e3047e47'
+down_revision = 'start_neutron_fwaas'
 
 
 def upgrade():
